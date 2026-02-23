@@ -7,27 +7,27 @@ public partial class Booking
 {
     public int Id { get; set; }
 
-    public int Userid { get; set; }
+    public int UserId { get; set; }
 
-    public int Workspaceid { get; set; }
+    public int WorkspaceId { get; set; }
 
-    public int Statusid { get; set; }
+    public int StatusId { get; set; }
 
-    public DateTime Starttime { get; set; }
+    public DateTime StartTime { get; set; }
 
-    public DateTime Endtime { get; set; }
+    public DateTime EndTime { get; set; }
 
-    public decimal Totalamount { get; set; }
+    public decimal TotalAmount { get; set; }
 
-    public string? Usercomment { get; set; }
+    public string? UserComment { get; set; }
 
-    public DateTime Createdat { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime? Updatedat { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
-    public virtual ICollection<Bookinghistory> Bookinghistories { get; set; } = new List<Bookinghistory>();
+    public virtual ICollection<BookingHistory> BookingHistories { get; set; } = new List<BookingHistory>();
 
-    public virtual Bookingstatus Status { get; set; } = null!;
+    public virtual BookingStatus Status { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
 

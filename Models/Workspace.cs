@@ -7,19 +7,19 @@ public partial class Workspace
 {
     public int Id { get; set; }
 
-    public int Typeid { get; set; }
+    public int TypeId { get; set; }
 
     public string Number { get; set; } = null!;
 
-    public decimal Priceperhour { get; set; }
+    public decimal PricePerHour { get; set; }
 
-    public bool Isactive { get; set; }
+    public bool IsActive { get; set; }
 
-    public DateTime Createdat { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime? Updatedat { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual Workspacetype Type { get; set; } = null!;
+    public virtual WorkspaceType Type { get; set; } = null!;
 }

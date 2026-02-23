@@ -17,9 +17,9 @@ public partial class BookingSystemContext : DbContext
 
     public virtual DbSet<Booking> Bookings { get; set; }
 
-    public virtual DbSet<Bookinghistory> Bookinghistories { get; set; }
+    public virtual DbSet<BookingHistory> BookingHistories { get; set; }
 
-    public virtual DbSet<Bookingstatus> Bookingstatuses { get; set; }
+    public virtual DbSet<BookingStatus> BookingStatuses { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -27,12 +27,12 @@ public partial class BookingSystemContext : DbContext
 
     public virtual DbSet<Workspace> Workspaces { get; set; }
 
-    public virtual DbSet<Workspacetype> Workspacetypes { get; set; }
+    public virtual DbSet<WorkspaceType> WorkspaceTypes { get; set; }
 
- protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        
-    }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("Host=localhost;Database=booking_system;Username=postgres;Password=sasha20072103");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Booking>(entity =>
@@ -44,91 +44,91 @@ public partial class BookingSystemContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.Createdat)
+            entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("createdat");
-            entity.Property(e => e.Endtime)
+                .HasColumnName("created_at");
+            entity.Property(e => e.EndTime)
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("endtime");
-            entity.Property(e => e.Starttime)
+                .HasColumnName("end_time");
+            entity.Property(e => e.StartTime)
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("starttime");
-            entity.Property(e => e.Statusid).HasColumnName("statusid");
-            entity.Property(e => e.Totalamount)
+                .HasColumnName("start_time");
+            entity.Property(e => e.StatusId).HasColumnName("status_id");
+            entity.Property(e => e.TotalAmount)
                 .HasPrecision(10, 2)
-                .HasColumnName("totalamount");
-            entity.Property(e => e.Updatedat)
+                .HasColumnName("total_amount");
+            entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("updatedat");
-            entity.Property(e => e.Usercomment).HasColumnName("usercomment");
-            entity.Property(e => e.Userid).HasColumnName("userid");
-            entity.Property(e => e.Workspaceid).HasColumnName("workspaceid");
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UserComment).HasColumnName("user_comment");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.WorkspaceId).HasColumnName("workspace_id");
 
             entity.HasOne(d => d.Status).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.Statusid)
+                .HasForeignKey(d => d.StatusId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_bookings_statuses");
 
             entity.HasOne(d => d.User).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.Userid)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_bookings_users");
 
             entity.HasOne(d => d.Workspace).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.Workspaceid)
+                .HasForeignKey(d => d.WorkspaceId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_bookings_workspaces");
         });
 
-        modelBuilder.Entity<Bookinghistory>(entity =>
+        modelBuilder.Entity<BookingHistory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("bookinghistory_pkey");
+            entity.HasKey(e => e.Id).HasName("booking_history_pkey");
 
-            entity.ToTable("bookinghistory");
+            entity.ToTable("booking_history");
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.Bookingid).HasColumnName("bookingid");
-            entity.Property(e => e.Changedat)
+            entity.Property(e => e.BookingId).HasColumnName("booking_id");
+            entity.Property(e => e.ChangeReason).HasColumnName("change_reason");
+            entity.Property(e => e.ChangedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("changedat");
-            entity.Property(e => e.Changedbyuserid).HasColumnName("changedbyuserid");
-            entity.Property(e => e.Changereason).HasColumnName("changereason");
-            entity.Property(e => e.Statustoid).HasColumnName("statustoid");
+                .HasColumnName("changed_at");
+            entity.Property(e => e.ChangedByUserId).HasColumnName("changed_by_user_id");
+            entity.Property(e => e.StatusToId).HasColumnName("status_to_id");
 
-            entity.HasOne(d => d.Booking).WithMany(p => p.Bookinghistories)
-                .HasForeignKey(d => d.Bookingid)
+            entity.HasOne(d => d.Booking).WithMany(p => p.BookingHistories)
+                .HasForeignKey(d => d.BookingId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_history_booking");
 
-            entity.HasOne(d => d.Changedbyuser).WithMany(p => p.Bookinghistories)
-                .HasForeignKey(d => d.Changedbyuserid)
+            entity.HasOne(d => d.ChangedByUser).WithMany(p => p.BookingHistories)
+                .HasForeignKey(d => d.ChangedByUserId)
                 .HasConstraintName("fk_history_changed_by_user");
 
-            entity.HasOne(d => d.Statusto).WithMany(p => p.Bookinghistories)
-                .HasForeignKey(d => d.Statustoid)
+            entity.HasOne(d => d.StatusTo).WithMany(p => p.BookingHistories)
+                .HasForeignKey(d => d.StatusToId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_history_status_to");
         });
 
-        modelBuilder.Entity<Bookingstatus>(entity =>
+        modelBuilder.Entity<BookingStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("bookingstatuses_pkey");
+            entity.HasKey(e => e.Id).HasName("booking_statuses_pkey");
 
-            entity.ToTable("bookingstatuses");
+            entity.ToTable("booking_statuses");
 
-            entity.HasIndex(e => e.Statusname, "bookingstatuses_statusname_key").IsUnique();
+            entity.HasIndex(e => e.StatusName, "booking_statuses_status_name_key").IsUnique();
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Statusname)
+            entity.Property(e => e.StatusName)
                 .HasMaxLength(50)
-                .HasColumnName("statusname");
+                .HasColumnName("status_name");
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -137,14 +137,14 @@ public partial class BookingSystemContext : DbContext
 
             entity.ToTable("roles");
 
-            entity.HasIndex(e => e.Rolename, "roles_rolename_key").IsUnique();
+            entity.HasIndex(e => e.RoleName, "roles_role_name_key").IsUnique();
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.Rolename)
+            entity.Property(e => e.RoleName)
                 .HasMaxLength(20)
-                .HasColumnName("rolename");
+                .HasColumnName("role_name");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -158,26 +158,26 @@ public partial class BookingSystemContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.Createdat)
+            entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("createdat");
+                .HasColumnName("created_at");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .HasColumnName("email");
-            entity.Property(e => e.Fullname)
+            entity.Property(e => e.FullName)
                 .HasMaxLength(100)
-                .HasColumnName("fullname");
-            entity.Property(e => e.Passwordhash)
+                .HasColumnName("full_name");
+            entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
-                .HasColumnName("passwordhash");
-            entity.Property(e => e.Roleid).HasColumnName("roleid");
-            entity.Property(e => e.Updatedat)
+                .HasColumnName("password_hash");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("updatedat");
+                .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
-                .HasForeignKey(d => d.Roleid)
+                .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_users_roles");
         });
@@ -191,45 +191,45 @@ public partial class BookingSystemContext : DbContext
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
-            entity.Property(e => e.Createdat)
+            entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("createdat");
-            entity.Property(e => e.Isactive)
+                .HasColumnName("created_at");
+            entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
-                .HasColumnName("isactive");
+                .HasColumnName("is_active");
             entity.Property(e => e.Number)
                 .HasMaxLength(20)
                 .HasColumnName("number");
-            entity.Property(e => e.Priceperhour)
+            entity.Property(e => e.PricePerHour)
                 .HasPrecision(10, 2)
-                .HasColumnName("priceperhour");
-            entity.Property(e => e.Typeid).HasColumnName("typeid");
-            entity.Property(e => e.Updatedat)
+                .HasColumnName("price_per_hour");
+            entity.Property(e => e.TypeId).HasColumnName("type_id");
+            entity.Property(e => e.UpdatedAt)
                 .HasColumnType("timestamp without time zone")
-                .HasColumnName("updatedat");
+                .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Type).WithMany(p => p.Workspaces)
-                .HasForeignKey(d => d.Typeid)
+                .HasForeignKey(d => d.TypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_workspaces_types");
         });
 
-        modelBuilder.Entity<Workspacetype>(entity =>
+        modelBuilder.Entity<WorkspaceType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("workspacetypes_pkey");
+            entity.HasKey(e => e.Id).HasName("workspace_types_pkey");
 
-            entity.ToTable("workspacetypes");
+            entity.ToTable("workspace_types");
 
-            entity.HasIndex(e => e.Typename, "workspacetypes_typename_key").IsUnique();
+            entity.HasIndex(e => e.TypeName, "workspace_types_type_name_key").IsUnique();
 
             entity.Property(e => e.Id)
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Typename)
+            entity.Property(e => e.TypeName)
                 .HasMaxLength(50)
-                .HasColumnName("typename");
+                .HasColumnName("type_name");
         });
 
         OnModelCreatingPartial(modelBuilder);

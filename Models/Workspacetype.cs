@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Lab1_Project.Models;
 
-public partial class Workspacetype
+public partial class WorkspaceType
 {
     public int Id { get; set; }
 
-    public string Typename { get; set; } = null!;
+    public string TypeName { get; set; } = null!;
 
     public string? Description { get; set; }
 
