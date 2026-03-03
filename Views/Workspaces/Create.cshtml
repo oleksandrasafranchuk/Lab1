@@ -1,0 +1,90 @@
+@model Lab1_Project.Models.Workspace
+
+@{
+    ViewData["Title"] = "Додати нове місце";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden animate slideIn">
+                <div class="row g-0">
+                    <div class="col-md-4 bg-dark-gradient d-flex align-items-center justify-content-center p-5 text-white">
+                        <div class="text-center">
+                            <div class="icon-circle bg-success bg-opacity-25 mb-4 mx-auto">
+                                <i class="bi bi-plus-circle fs-1 text-success"></i>
+                            </div>
+                            <h2 class="fw-bold">Нове місце</h2>
+                            <p class="text-muted small">Створіть новий робочий простір, заповнивши основні характеристики.</p>
+                            <hr class="my-4 opacity-25">
+                            <div class="d-flex justify-content-center gap-3 opacity-50">
+                                <i class="bi bi-laptop fs-4"></i>
+                                <i class="bi bi-pci-card fs-4"></i>
+                                <i class="bi bi-printer fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 bg-white">
+                        <div class="card-body p-5">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <h3 class="fw-bold m-0">Параметри кабінету</h3>
+                                <a asp-action="Index" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+
+                            <form asp-action="Create" method="post">
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small" role="alert"></div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label asp-for="Number" class="form-label small fw-bold text-muted text-uppercase">Номер кабінету</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-door-closed"></i></span>
+                                            <input asp-for="Number" class="form-control border-0 bg-light shadow-none py-2" placeholder="напр. B-204" />
+                                        </div>
+                                        <span asp-validation-for="Number" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label asp-for="TypeId" class="form-label small fw-bold text-muted text-uppercase">Тип приміщення</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-ui-checks-grid"></i></span>
+                                            <select asp-for="TypeId" class="form-select border-0 bg-light shadow-none py-2" asp-items="ViewBag.TypeId">
+                                                <option value="">-- Оберіть тип --</option>
+                                            </select>
+                                        </div>
+                                        <span asp-validation-for="TypeId" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label asp-for="PricePerHour" class="form-label small fw-bold text-muted text-uppercase">Ціна за годину (₴)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-cash-stack"></i></span>
+                                            <input asp-for="PricePerHour" class="form-control border-0 bg-light shadow-none py-2" type="number" step="0.01" placeholder="0.00" />
+                                        </div>
+                                        <span asp-validation-for="PricePerHour" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 d-flex gap-3">
+                                    <button type="submit" class="btn btn-success btn-lg px-5 py-3 rounded-3 shadow hover-lift flex-grow-1">
+                                        <i class="bi bi-cloud-upload me-2"></i>Створити місце
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-3">
+                                        Скасувати
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,135 @@
+@model StatisticsViewModel
+@{
+    ViewData["Title"] = "Статистика";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold m-0">Статистика сервісу</h2>
+            <p class="text-muted small">Аналітика доходів та активності бронювань</p>
+        </div>
+        
+        <form method="get" class="d-flex gap-2">
+            <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                <input type="date" name="startDate" class="form-control border-0 bg-light" value="@Model.StartDate?.ToString("yyyy-MM-dd")">
+                <span class="input-group-text border-0 bg-light"><i class="bi bi-arrow-right"></i></span>
+                <input type="date" name="endDate" class="form-control border-0 bg-light" value="@Model.EndDate?.ToString("yyyy-MM-dd")">
+            </div>
+            <button type="submit" class="btn btn-dark rounded-3 px-4 shadow-sm">Оновити</button>
+        </form>
+    </div>
+
+    <div class="row g-4 mb-5 animate slideIn">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4 h-100 position-relative overflow-hidden">
+                <div class="position-relative z-1">
+                    <h6 class="text-uppercase opacity-75 small fw-bold mb-3">Загальний дохід</h6>
+                    <h2 class="display-5 fw-bold mb-0">@Model.TotalRevenue ₴</h2>
+                </div>
+                <i class="bi bi-wallet2 position-absolute end-0 bottom-0 opacity-25 m-n3" style="font-size: 8rem;"></i>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 bg-dark text-white p-4 h-100 position-relative overflow-hidden">
+                <div class="position-relative z-1">
+                    <h6 class="text-uppercase opacity-75 small fw-bold mb-3">Кількість бронювань</h6>
+                    <h2 class="display-5 fw-bold mb-0">@Model.TotalBookings</h2>
+                </div>
+                <i class="bi bi-calendar-check position-absolute end-0 bottom-0 opacity-25 m-n3" style="font-size: 8rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-7 animate slideIn">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-4">Дохід за кабінетами (₴)</h5>
+                <canvas id="revenueChart" style="max-height: 350px;"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-5 animate slideIn" style="animation-delay: 0.2s;">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-4">Популярність типів</h5>
+                <canvas id="typeChart" style="max-height: 350px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold m-0">Рейтинг за типами</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach(var item in Model.BookingsByType) {
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="text-secondary">@item.Key</span>
+                            <span class="badge badge-custom badge-primary-soft">@item.Value записів</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold m-0">Дохід по кабінетах</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach(var item in Model.RevenueByWorkspace) {
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span class="fw-bold text-dark">№ @item.Key</span>
+                            <span class="text-success fw-bold">@item.Value ₴</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.RevenueByWorkspace.Keys.Select(k => "№ " + k))),
+                datasets: [{
+                    label: 'Дохід ₴',
+                    data: @Html.Raw(Json.Serialize(Model.RevenueByWorkspace.Values)),
+                    backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+            }
+        });
+
+        const typeCtx = document.getElementById('typeChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.BookingsByType.Keys)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(Model.BookingsByType.Values)),
+                    backgroundColor: ['#0d6efd', '#212529', '#198754', '#ffc107', '#0dcaf0'],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                cutout: '70%',
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    </script>
+}

@@ -2,7 +2,76 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@{
+    ViewData["Title"] = "Головна";
+    var role = Context.Session.GetString("UserRole") ?? "Гість";
+}
+
+<div class="hero-wrapper overflow-hidden">
+    <section class="py-5 py-xl-8">
+        <div class="container">
+            <div class="row gy-4 align-items-center">
+                <div class="col-12 col-lg-6 text-center text-lg-start">
+                    <h6 class="text-primary fw-bold text-uppercase mb-3 animate slideIn">
+                        Ласкаво просимо!
+                    </h6>
+                    <h1 class="display-3 fw-bold mb-4 animate slideIn">
+                        Ваш ідеальний <br />
+                        <span class="text-gradient">робочий простір</span>
+                    </h1>
+                    <p class="lead text-muted mb-5 animate slideIn" style="max-width: 500px;">
+                        Бронюйте сучасні офіси, конференц-зали та робочі місця в один клік. 
+                        Ми створили умови, щоб ви могли зосередитися на головному.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start animate slideIn">
+                        <a asp-controller="Workspaces" asp-action="Index" class="btn btn-primary btn-lg px-5 py-3 shadow">
+                            Знайти робоче місце
+                        </a>
+                
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6 animate slideIn">
+                    <div class="hero-image-container position-relative">
+                        <div class="blob-bg shadow-lg"></div>
+                        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800" 
+                             alt="Office" class="img-fluid rounded-4 shadow-lg position-relative z-1" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light-soft border-top">
+        <div class="container py-4">
+            <div class="row g-4 text-center">
+                <div class="col-md-4 animate slideIn">
+                    <div class="feature-card p-4 h-100">
+                        <div class="icon-box mb-3 mx-auto shadow-sm text-primary">
+                            <i class="bi bi-lightning-charge fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold">Швидкість</h4>
+                        <p class="text-muted">Миттєве бронювання без зайвих дзвінків та очікування.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate slideIn">
+                    <div class="feature-card p-4 h-100">
+                        <div class="icon-box mb-3 mx-auto shadow-sm text-primary">
+                            <i class="bi bi-shield-check fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold">Надійність</h4>
+                        <p class="text-muted">Гарантія того, що ваше місце буде вільне у вказаний час.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate slideIn">
+                    <div class="feature-card p-4 h-100">
+                        <div class="icon-box mb-3 mx-auto shadow-sm text-primary">
+                           <i class="bi bi-grid-3x3-gap fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold">Великий вибір просторів</h4>
+                        <p class="text-muted">Багато робочих місць, які підйдуть під будь-які потреби.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
