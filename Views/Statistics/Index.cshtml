@@ -3,13 +3,31 @@
     ViewData["Title"] = "Статистика";
 }
 
+@functions {
+    public string GetRecordsString(int count)
+    {
+        int lastDigit = count % 10;
+        int lastTwoDigits = count % 100;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 19)
+            return "записів";
+
+        if (lastDigit == 1)
+            return "запис";
+
+        if (lastDigit >= 2 && lastDigit <= 4)
+            return "записи";
+
+        return "записів";
+    }
+}
+
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h2 class="fw-bold m-0">Статистика сервісу</h2>
-            <p class="text-muted small">Аналітика доходів та активності бронювань</p>
         </div>
-        
+      
         <form method="get" class="d-flex gap-2">
             <div class="input-group shadow-sm rounded-3 overflow-hidden">
                 <input type="date" name="startDate" class="form-control border-0 bg-light" value="@Model.StartDate?.ToString("yyyy-MM-dd")">
@@ -19,7 +37,21 @@
             <button type="submit" class="btn btn-dark rounded-3 px-4 shadow-sm">Оновити</button>
         </form>
     </div>
-
+    <div class="d-flex gap-2 mb-4">
+      <a asp-action="ExportToExcel" 
+       asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")" 
+       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")" 
+       class="btn btn-outline-success rounded-3 shadow-sm">
+        <i class="bi bi-file-earmark-excel me-2"></i> Експорт Excel
+      </a>
+    
+      <a asp-action="ExportToWord" 
+       asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")" 
+       asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")" 
+       class="btn btn-outline-primary rounded-3 shadow-sm">
+        <i class="bi bi-file-earmark-word me-2"></i> Експорт Word
+      </a>
+    </div>
     <div class="row g-4 mb-5 animate slideIn">
         <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4 h-100 position-relative overflow-hidden">
@@ -63,24 +95,26 @@
                     <h6 class="fw-bold m-0">Рейтинг за типами</h6>
                 </div>
                 <div class="list-group list-group-flush">
-                    @foreach(var item in Model.BookingsByType) {
-                        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <span class="text-secondary">@item.Key</span>
-                            <span class="badge badge-custom badge-primary-soft">@item.Value записів</span>
-                        </div>
-                    }
-                </div>
-            </div>
+                     @foreach(KeyValuePair<string, int> item in Model.BookingsByType) {
+                           <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                               <span class="text-secondary">@item.Key</span>
+                               <span class="badge badge-custom badge-primary-soft">
+                                    @item.Value @GetRecordsString(item.Value)
+                                </span>
+                            </div>
+                         }
+                 </div>
+            </div> 
         </div>
         <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white py-3">
-                    <h6 class="fw-bold m-0">Дохід по кабінетах</h6>
+                    <h6 class="fw-bold m-0">Заробіток по кабінетах</h6>
                 </div>
                 <div class="list-group list-group-flush">
                     @foreach(var item in Model.RevenueByWorkspace) {
                         <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <span class="fw-bold text-dark">№ @item.Key</span>
+                            <span class="fw-bold text-dark">@item.Key</span>
                             <span class="text-success fw-bold">@item.Value ₴</span>
                         </div>
                     }
@@ -97,7 +131,7 @@
         new Chart(revenueCtx, {
             type: 'bar',
             data: {
-                labels: @Html.Raw(Json.Serialize(Model.RevenueByWorkspace.Keys.Select(k => "№ " + k))),
+                labels: @Html.Raw(Json.Serialize(Model.RevenueByWorkspace.Keys.Select(k =>  k))),
                 datasets: [{
                     label: 'Дохід ₴',
                     data: @Html.Raw(Json.Serialize(Model.RevenueByWorkspace.Values)),
@@ -120,7 +154,7 @@
                 labels: @Html.Raw(Json.Serialize(Model.BookingsByType.Keys)),
                 datasets: [{
                     data: @Html.Raw(Json.Serialize(Model.BookingsByType.Values)),
-                    backgroundColor: ['#0d6efd', '#212529', '#198754', '#ffc107', '#0dcaf0'],
+                    backgroundColor: ['#0d6efd', '#F08080', '#198754', '#ffc107', '#0dcaf0', '#6f42c1', '#fd7e14', '#20c997'],
                     borderWidth: 0,
                     hoverOffset: 15
                 }]

@@ -17,7 +17,21 @@ public class WorkspacesController : Controller
     public async Task<IActionResult> Index(int? typeId, decimal? minPrice, decimal? maxPrice, string searchNumber, DateTime? searchStart, DateTime? searchEnd)
     {
         string role = HttpContext.Session.GetString("UserRole") ?? "User";
-
+        if (searchStart.HasValue && searchEnd.HasValue)
+    {
+        if (searchStart >= searchEnd)
+        {
+            TempData["Error"] = "Час початку оренди не може бути пізнішим або рівним часу завершення.";
+            searchStart = null;
+            searchEnd = null;
+        }
+        else if (searchStart < DateTime.Now.AddMinutes(-5))
+        {
+            TempData["Error"] = "Не можна забронювати місце на минулий час.";
+            searchStart = null;
+            searchEnd = null;
+        }
+    }
         var query = _context.Workspaces
             .Include(w => w.Type)
             .AsQueryable();
