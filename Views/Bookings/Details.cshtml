@@ -1,0 +1,170 @@
+@model Lab1_Project.Models.Booking
+@{
+    ViewData["Title"] = "Деталі бронювання #" + Model.Id;
+    var role = Context.Session.GetString("UserRole");
+    
+    var cancelHistory = Model.BookingHistories
+        .FirstOrDefault(h => h.StatusToId == 3);
+}
+
+<div class="container mt-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Бронювання</a></li>
+            <li class="breadcrumb-item active">Замовлення #@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 animate slideIn">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-receipt me-2 text-primary"></i>Деталі замовлення
+                    </h5>
+                    @{
+                        var badgeClass = Model.StatusId == 2 ? "badge-success-soft" : 
+                                         Model.StatusId == 3 ? "badge-danger-soft" : "badge-warning-soft";
+                    }
+                    <span class="badge-custom @badgeClass">
+                        <i class="bi bi-dot"></i> @Model.Status.StatusName
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    @if (Model.StatusId == 3 && cancelHistory != null)
+                    {
+                        <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center">
+                            <i class="bi bi-x-octagon-fill fs-4 me-3"></i>
+                            <div>
+                                <strong class="d-block">Причина скасування:</strong>
+                                <span class="small">@cancelHistory.ChangeReason</span>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row gy-4">
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Робоче місце</label>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-square bg-primary bg-opacity-10 text-primary me-3">
+                                    <i class="bi bi-door-open"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">@Model.Workspace.Number</div>
+                                    <div class="small text-muted">@Model.Workspace.Type.TypeName</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Вартість</label>
+                            <div class="h3 fw-bold text-success mb-0">@Model.TotalAmount ₴</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted text-uppercase fw-bold mb-2">Період оренди</label>
+                            <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                                <div class="text-center flex-grow-1">
+                                    <div class="small text-muted">Початок</div>
+                                    <div class="fw-bold">@Model.StartTime.ToString("dd MMM, HH:mm")</div>
+                                </div>
+                                <div class="px-3 text-primary"><i class="bi bi-arrow-right"></i></div>
+                                <div class="text-center flex-grow-1">
+                                    <div class="small text-muted">Кінець</div>
+                                    <div class="fw-bold">@Model.EndTime.ToString("dd MMM, HH:mm")</div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.UserComment))
+                        {
+                            <div class="col-12">
+                                <label class="small text-muted text-uppercase fw-bold mb-1">Коментар клієнта</label>
+                                <div class="p-3 bg-light rounded-3 fst-italic">"@Model.UserComment"</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-4 mt-5"><i class="bi bi-clock-history me-2"></i>Історія змін</h5>
+            <div class="timeline shadow-sm p-4 bg-white rounded-4 mb-4">
+                @foreach (var history in Model.BookingHistories.OrderByDescending(h => h.ChangedAt))
+                {
+                    <div class="timeline-item pb-4">
+                        <div class="timeline-marker @(history.StatusToId == 2 ? "bg-success" : history.StatusToId == 3 ? "bg-danger" : "bg-warning")"></div>
+                        <div class="timeline-content ps-4">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="fw-bold mb-0">@history.StatusTo.StatusName</h6>
+                                <span class="small text-muted">@history.ChangedAt.ToString("g")</span>
+                            </div>
+                            <p class="text-secondary small mt-1 mb-0">
+                                @(string.IsNullOrEmpty(history.ChangeReason) ? "Зміна статусу без додаткових пояснень" : history.ChangeReason)
+                            </p>
+                            <div class="small mt-1 fst-italic text-muted">
+                                <i class="bi bi-person-circle me-1"></i>Відповідальний: @(history.ChangedByUser?.FullName ?? "Клієнт")
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 position-sticky" style="top: 100px;">
+                <div class="card-body p-4">
+                    <h6 class="text-uppercase text-muted fw-bold small mb-4">Клієнт</h6>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="avatar-md me-3 shadow-sm">
+                            @Model.User.FullName.Substring(0, 1)
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark">@Model.User.FullName</div>
+                            <div class="small text-muted">@Model.User.Email</div>
+                        </div>
+                    </div>
+                    
+                    <hr class="opacity-50 my-4">
+                    
+                    <div class="d-grid gap-2">
+                        @if (role == "Admin" && Model.StatusId == 1)
+                        {
+                            <form asp-action="Approve" asp-route-id="@Model.Id" method="post">
+                                <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill shadow-sm hover-lift">
+                                    <i class="bi bi-check2-circle me-2"></i>Підтвердити
+                                </button>
+                            </form>
+                        }
+                        
+                        @if (Model.StatusId != 3)
+                        {
+                            <button class="btn btn-outline-danger btn-lg w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                <i class="bi bi-x-circle me-2"></i>Скасувати
+                            </button>
+                        }
+                        
+                        <a asp-action="Index" class="btn btn-light btn-lg w-100 rounded-pill text-muted">
+                            <i class="bi bi-arrow-left me-2"></i>До списку
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">Скасування замовлення</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="text-muted">Вкажіть причину скасування бронювання №@Model.Id:</p>
+                <textarea name="reason" class="form-control rounded-3 border-light bg-light shadow-none" rows="3" placeholder="Наприклад: Технічні роботи або прохання клієнта..."></textarea>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Назад</button>
+                <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm">Підтвердити</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+@model Lab1_Project.Models.WorkspaceType
+
+@{
+    ViewData["Title"] = "Створити новий тип";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden animate slideIn">
+                <div class="row g-0">
+                    <div class="col-md-4 bg-dark-gradient d-flex align-items-center justify-content-center p-5 text-white">
+                        <div class="text-center">
+                            <div class="icon-circle bg-success bg-opacity-25 mb-4 mx-auto">
+                                <i class="bi bi-plus-lg fs-1 text-success"></i>
+                            </div>
+                            <h2 class="fw-bold">Новий тип</h2>
+                            
+                            <hr class="my-4 opacity-25">
+                            <div class="d-flex justify-content-center gap-3 opacity-50">
+                                <i class="bi bi-ui-checks fs-4"></i>
+                                <i class="bi bi-tags fs-4"></i>
+                                <i class="bi bi-clipboard-plus fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 bg-white">
+                        <div class="card-body p-5">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <h3 class="fw-bold m-0">Параметри типу</h3>
+                                <a asp-action="Index" class="btn btn-light btn-sm rounded-circle shadow-sm" title="Закрити">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+
+                            <form asp-action="Create" method="post">
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small py-2" role="alert"></div>
+
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <label asp-for="TypeName" class="form-label small fw-bold text-muted text-uppercase">Назва категорії</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-pencil-square"></i></span>
+                                            <input asp-for="TypeName" class="form-control border-0 bg-light shadow-none py-2" placeholder="Наприклад: Конференц-зал" required />
+                                        </div>
+                                        <span asp-validation-for="TypeName" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label asp-for="Description" class="form-label small fw-bold text-muted text-uppercase">Короткий опис</label>
+                                        <textarea asp-for="Description" class="form-control border-0 bg-light shadow-none py-3" rows="4" placeholder="Опишіть особливості цієї категорії приміщень..."></textarea>
+                                        <span asp-validation-for="Description" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 d-flex gap-3">
+                                    <button type="submit" class="btn btn-success btn-lg px-5 py-3 rounded-3 shadow hover-lift flex-grow-1">
+                                        <i class="bi bi-cloud-plus me-2"></i>Додати категорію
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-3">
+                                        Скасувати
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,118 @@
+@model IEnumerable<Lab1_Project.Models.Workspace>
+@{
+    var role = Context.Session.GetString("UserRole") ?? "User";
+    ViewData["Title"] = "Робочі місця";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold m-0">Робочі місця</h2>
+        @if (role == "Admin") {
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Додати місце
+            </a>
+        }
+    </div>
+
+    <div class="card mb-5 border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-4 bg-light-soft">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted">Тип приміщення</label>
+                    <select name="typeId" class="form-select border-0 shadow-sm rounded-3" asp-items="ViewBag.TypeId">
+                        <option value="">Всі типи</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted">Мін. ціна</label>
+                    <input type="number" name="minPrice" class="form-control border-0 shadow-sm rounded-3" placeholder="0">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-muted">Вільні у період</label>
+                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                        <input type="datetime-local" name="searchStart" class="form-control border-0" value="@ViewBag.CurrentStart">
+                        <span class="input-group-text border-0 bg-white"><i class="bi bi-arrow-right"></i></span>
+                        <input type="datetime-local" name="searchEnd" class="form-control border-0" value="@ViewBag.CurrentEnd">
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark w-100 rounded-3 py-2 shadow-sm">
+                        <i class="bi bi-search me-2"></i>Пошук
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var item in Model) {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm rounded-4 position-relative card-hover @(role == "Admin" && !item.IsActive ? "opacity-75 grayscale" : "")">
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h4 class="card-title fw-bold mb-0">@item.Number</h4>
+                                @if (role == "Admin" && !item.IsActive)
+                                {
+                                    <span class="badge-custom badge-danger-soft mt-2">
+                                        <i class="bi bi-eye-slash me-1"></i> Неактивне
+                                    </span>
+                                }
+                                else if (item.IsActive)
+                                {
+                                    <span class="badge-custom badge-success-soft mt-2">
+                                        <i class="bi bi-check-circle me-1"></i> Доступно
+                                    </span>
+                                }
+                            </div>
+                            <span class="badge bg-white text-primary border border-primary-subtle rounded-pill px-3">
+                                @item.Type.TypeName
+                            </span>
+                        </div>
+
+                        <a asp-action="Details" asp-route-id="@item.Id" class="stretched-link"></a>
+                        
+                        <p class="card-text text-muted small">
+                            @if (!string.IsNullOrEmpty(item.Type.Description)) {
+                                @(item.Type.Description.Length > 90 ? item.Type.Description.Substring(0, 90) + "..." : item.Type.Description)
+                            } else {
+                                <span>Опис приміщення відсутній.</span>
+                            }
+                        </p>
+                        
+                        <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div class="price-tag">
+                                <span class="h4 fw-bold text-dark mb-0">@item.PricePerHour ₴</span>
+                                <small class="text-muted">/ год</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0 d-grid gap-2" style="position: relative; z-index: 2;">
+                        @if (role != "Admin") 
+                        {
+                            <a asp-controller="Bookings" asp-action="Create" asp-route-workspaceId="@item.Id" 
+                               class="btn btn-primary rounded-pill py-2 shadow-sm">Забронювати</a>
+                        }
+                        
+                        @if (role == "Admin") {
+                            <div class="btn-group w-100 rounded-pill overflow-hidden shadow-sm">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary border-0 bg-light">
+                                    <i class="bi bi-pencil-square me-1"></i> Редагувати
+                                </a>
+                                @if (item.IsActive) {
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-contents" onsubmit="return confirm('Ви впевнені?')">
+                                        <button type="submit" class="btn btn-outline-danger border-0 bg-light w-100">
+                                            <i class="bi bi-trash me-1"></i> Видалити
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

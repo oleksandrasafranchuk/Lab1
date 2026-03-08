@@ -1,0 +1,77 @@
+@model Lab1_Project.Models.WorkspaceType
+
+@{
+    ViewData["Title"] = "Редагувати тип: " + Model.TypeName;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden animate slideIn">
+                <div class="row g-0">
+                    <div class="col-md-4 bg-dark-gradient d-flex align-items-center justify-content-center p-5 text-white">
+                        <div class="text-center">
+                            <div class="icon-circle bg-primary bg-opacity-25 mb-4 mx-auto">
+                                <i class="bi bi-collection-play fs-1 text-primary"></i>
+                            </div>
+                            <h2 class="fw-bold">Категорії</h2>
+                            <p class="text-muted small">
+                                Зміна назви або опису типу вплине на те, як ці приміщення відображатимуться в каталозі для користувачів.
+                            </p>
+                            <hr class="my-4 opacity-25">
+                            <div class="small text-white-50">
+                                <i class="bi bi-info-circle me-1"></i> Переконайтеся, що опис є зрозумілим.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8 bg-white">
+                        <div class="card-body p-5">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <h3 class="fw-bold m-0">Налаштування типу</h3>
+                                <a asp-action="Index" class="btn btn-light btn-sm rounded-circle shadow-sm" title="Назад">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+
+                            <form asp-action="Edit">
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small py-2" role="alert"></div>
+                                <input type="hidden" asp-for="Id" />
+
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <label asp-for="TypeName" class="form-label small fw-bold text-muted text-uppercase">Назва категорії</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-fonts"></i></span>
+                                            <input asp-for="TypeName" class="form-control border-0 bg-light shadow-none py-2" placeholder="напр. Конференц-зал" />
+                                        </div>
+                                        <span asp-validation-for="TypeName" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label asp-for="Description" class="form-label small fw-bold text-muted text-uppercase">Опис (для користувачів)</label>
+                                        <textarea asp-for="Description" class="form-control border-0 bg-light shadow-none py-3" rows="4" placeholder="Коротко опишіть переваги цього типу..."></textarea>
+                                        <span asp-validation-for="Description" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 d-flex gap-3">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow hover-lift flex-grow-1">
+                                        <i class="bi bi-save me-2"></i>Зберегти зміни
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-3">
+                                        Скасувати
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
