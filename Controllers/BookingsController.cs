@@ -18,7 +18,7 @@ public class BookingsController : Controller
     public async Task<IActionResult> Index(int? statusId, string workspaceNumber, DateTime? dateFrom)
     {
         string role = HttpContext.Session.GetString("UserRole") ?? "User";
-        int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 1;
+        int currentUserId = HttpContext.Session.GetInt32("UserId") ?? 2;
 
         var query = _context.Bookings
             .Include(b => b.Workspace)

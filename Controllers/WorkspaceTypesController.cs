@@ -9,7 +9,17 @@ public class WorkspaceTypesController : Controller
     private readonly BookingSystemContext _context;
     public WorkspaceTypesController(BookingSystemContext context) => _context = context;
 
-    public async Task<IActionResult> Index() => View(await _context.WorkspaceTypes.ToListAsync());
+    public async Task<IActionResult> Index() 
+{
+    
+    if (HttpContext.Session.GetString("UserRole") != "Admin") 
+    {
+        return Forbid();
+    }
+
+    var types = await _context.WorkspaceTypes.ToListAsync();
+    return View(types);
+}
 
     public IActionResult Create() 
     {

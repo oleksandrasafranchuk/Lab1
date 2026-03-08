@@ -27,15 +27,27 @@
         <div>
             <h2 class="fw-bold m-0">Статистика сервісу</h2>
         </div>
-      
         <form method="get" class="d-flex gap-2">
-            <div class="input-group shadow-sm rounded-3 overflow-hidden">
-                <input type="date" name="startDate" class="form-control border-0 bg-light" value="@Model.StartDate?.ToString("yyyy-MM-dd")">
-                <span class="input-group-text border-0 bg-light"><i class="bi bi-arrow-right"></i></span>
-                <input type="date" name="endDate" class="form-control border-0 bg-light" value="@Model.EndDate?.ToString("yyyy-MM-dd")">
-            </div>
-            <button type="submit" class="btn btn-dark rounded-3 px-4 shadow-sm">Оновити</button>
-        </form>
+    <div class="input-group shadow-sm rounded-3 overflow-hidden">
+        <input type="date" name="startDate" 
+               class="form-control border-0 bg-light" 
+               value="@Model.StartDate?.ToString("yyyy-MM-dd")"
+               onkeydown="if(event.keyCode==13) { this.form.submit(); return false; }">
+        
+        <span class="input-group-text border-0 bg-light"><i class="bi bi-arrow-right"></i></span>
+        
+        <input type="date" name="endDate" 
+               class="form-control border-0 bg-light" 
+               value="@Model.EndDate?.ToString("yyyy-MM-dd")"
+               onkeydown="if(event.keyCode==13) { this.form.submit(); return false; }">
+    </div>
+    <button type="submit" class="btn btn-dark rounded-3 px-4 shadow-sm">
+        <i class="bi bi-search"></i>
+    </button>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-3 px-3 shadow-sm d-flex align-items-center" title="Скинути">
+        <i class="bi bi-x-lg"></i>
+    </a>
+</form>
     </div>
     <div class="d-flex gap-2 mb-4">
       <a asp-action="ExportToExcel" 

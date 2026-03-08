@@ -33,7 +33,7 @@ public IActionResult Index()
     if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserRole")))
     {
         HttpContext.Session.SetString("UserRole", "User");
-        HttpContext.Session.SetInt32("UserId", 1); 
+        HttpContext.Session.SetInt32("UserId", 2); 
     }
     return View();
 }
@@ -43,15 +43,10 @@ public IActionResult SetRole(string role, int? id)
     if (!string.IsNullOrEmpty(role))
     {
         HttpContext.Session.SetString("UserRole", role);
-        HttpContext.Session.SetInt32("UserId", id ?? 1);
+        HttpContext.Session.SetInt32("UserId", id ?? 2);
     }
     
     var returnUrl = Request.Headers["Referer"].ToString();
     return Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
-}
-public async Task<IActionResult> DbTest()
-{
-    var usersCount = await _context.Users.CountAsync();
-    return Content($"З'єднання з БД ОК. Користувачів у БД: {usersCount}");
 }
 }

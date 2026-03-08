@@ -14,7 +14,7 @@ public class WorkspacesController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index(int? typeId, decimal? minPrice, decimal? maxPrice, string searchNumber, DateTime? searchStart, DateTime? searchEnd)
+    public async Task<IActionResult> Index(int? typeId, decimal? minPrice, decimal? maxPrice, DateTime? searchStart, DateTime? searchEnd)
     {
         string role = HttpContext.Session.GetString("UserRole") ?? "User";
         if (searchStart.HasValue && searchEnd.HasValue)
@@ -41,8 +41,6 @@ public class WorkspacesController : Controller
             query = query.Where(w => w.IsActive);
         }
 
-        if (!string.IsNullOrEmpty(searchNumber))
-            query = query.Where(w => w.Number.Contains(searchNumber));
 
         if (typeId.HasValue) 
             query = query.Where(w => w.TypeId == typeId);
@@ -129,7 +127,7 @@ public async Task<IActionResult> Edit(int id, Workspace workspace)
     if (id != workspace.Id || HttpContext.Session.GetString("UserRole") != "Admin") 
         return Forbid();
 
-    // Видаляємо перевірку властивостей, які не заповнюються у формі
+  
     ModelState.Remove("Type");
     ModelState.Remove("Bookings");
 
