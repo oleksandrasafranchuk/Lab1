@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Бронювання";
+    var price = ViewBag.PricePerHour ?? 0;
 }
 
 <div class="container mt-5">
@@ -9,17 +10,17 @@
         <div class="col-lg-10">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden animate slideIn">
                 <div class="row g-0">
-                    <div class="col-md-5 bg-dark-gradient d-flex align-items-center justify-content-center p-5 text-white">
+                    <div class="col-md-5 bg-dark-gradient d-flex align-items-center justify-content-center p-5 text-white" style="background: linear-gradient(135deg, #1a1a1a 0%, #3d3d3d 100%);">
                         <div class="text-center">
-                            <div class="icon-circle bg-primary bg-opacity-25 mb-4 mx-auto">
+                            <div class="icon-circle bg-primary bg-opacity-25 mb-4 mx-auto" style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-clock-history fs-1 text-primary"></i>
                             </div>
                             <h2 class="fw-bold">Бронювання</h2>
-                            <p class="text-muted small">Оберіть зручний час. Система автоматично перевірить доступність та розрахує вартість вашого перебування.</p>
+                            <p class="text-muted small">Оберіть час. Система автоматично перевірить доступність.</p>
                             
                             <div class="mt-5 p-3 bg-white bg-opacity-10 rounded-3 border border-white border-opacity-10">
                                 <small class="d-block text-white-50 mb-1"><i class="bi bi-info-circle me-1"></i> Тариф</small>
-                                <span class="fw-bold">Погодинна оплата</span>
+                                <span class="fw-bold">@price грн / год</span>
                             </div>
                         </div>
                     </div>
@@ -36,45 +37,43 @@
                             <form asp-action="Create" method="post">
                                 <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small py-2" role="alert"></div>
                                 
-                                <input type="hidden" asp-for="WorkspaceId" value="@Context.Request.Query["workspaceId"]" />
+                                <input type="hidden" asp-for="WorkspaceId" />
 
                                 <div class="row g-4">
                                     <div class="col-12">
                                         <label asp-for="StartTime" class="form-label small fw-bold text-muted text-uppercase">Час початку</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-plus"></i></span>
-                                            <input asp-for="StartTime" type="datetime-local" class="form-control border-0 bg-light shadow-none py-2" required />
+                                            <input asp-for="StartTime" id="startTime" type="datetime-local" class="form-control border-0 bg-light shadow-none py-2" asp-format="{0:yyyy-MM-ddTHH:mm}" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
                                         </div>
-                                        <span asp-validation-for="StartTime" class="text-danger small"></span>
                                     </div>
 
                                     <div class="col-12">
                                         <label asp-for="EndTime" class="form-label small fw-bold text-muted text-uppercase">Час завершення</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-check"></i></span>
-                                            <input asp-for="EndTime" type="datetime-local" class="form-control border-0 bg-light shadow-none py-2" required />
+                                            <input asp-for="EndTime" id="endTime" type="datetime-local" class="form-control border-0 bg-light shadow-none py-2" asp-format="{0:yyyy-MM-ddTHH:mm}" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
                                         </div>
-                                        <span asp-validation-for="EndTime" class="text-danger small"></span>
                                     </div>
 
                                     <div class="col-12">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Коментар до бронювання</label>
-                                        <textarea name="userComment" class="form-control border-0 bg-light shadow-none py-3" rows="3" placeholder="Ваші побажання або особливі вимоги..."></textarea>
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Коментар</label>
+                                        <textarea name="userComment" class="form-control border-0 bg-light shadow-none py-3" rows="3" placeholder="Ваші побажання..."></textarea>
                                     </div>
                                 </div>
 
                                 <div class="alert alert-info border-0 rounded-3 mt-4 small d-flex align-items-center bg-primary bg-opacity-10 text-primary">
                                     <i class="bi bi-calculator fs-5 me-3"></i>
-                                    <span>Сума буде розрахована автоматично після підтвердження.</span>
+                                    <div>
+                                        <span>Орієнтовна сума: </span>
+                                        <strong id="totalPrice">0</strong> <strong>грн</strong>
+                                    </div>
                                 </div>
 
                                 <div class="mt-5 d-flex gap-3">
                                     <button type="submit" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow hover-lift flex-grow-1">
-                                        <i class="bi bi-check2-circle me-2"></i>Підтвердити запит
+                                        Підтвердити запит
                                     </button>
-                                    <a asp-controller="Workspaces" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-3">
-                                        Скасувати
-                                    </a>
                                 </div>
                             </form>
                         </div>
@@ -87,4 +86,24 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const startInp = document.getElementById('startTime');
+        const endInp = document.getElementById('endTime');
+        const priceDisplay = document.getElementById('totalPrice');
+        const pricePerHr = parseFloat("@price".replace(',', '.'));
+
+        function calc() {
+            const s = new Date(startInp.value);
+            const e = new Date(endInp.value);
+            if (s && e && e > s) {
+                const hours = (e - s) / 3600000;
+                priceDisplay.innerText = (hours * pricePerHr).toFixed(2);
+            } else {
+                priceDisplay.innerText = "0";
+            }
+        }
+        startInp.onchange = calc;
+        endInp.onchange = calc;
+        calc();
+    </script>
 }
