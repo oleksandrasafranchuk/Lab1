@@ -5,6 +5,17 @@
 }
 
 <div class="container mt-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow border-0 rounded-4 mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                <div>@TempData["Success"]</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show shadow border-0 rounded-4 mb-4" role="alert">
@@ -14,19 +25,27 @@
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        TempData["Error"] = null;
     }
 
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <div-group>
+        <div>
             <h2 class="fw-bold m-0">Типи приміщень</h2>
-            
-        </div-group>
+        </div>
         
         @if(role == "Admin") { 
-            <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm hover-lift">
-                <i class="bi bi-plus-circle me-2"></i>Додати новий тип
-            </a> 
+            <div class="d-flex gap-2">
+             
+                <form asp-action="Import" method="post" enctype="multipart/form-data" class="d-inline-flex gap-2">
+                    <input type="file" name="file" class="form-control form-control-sm rounded-pill" style="width: 200px;" accept=".xlsx,.docx" required />
+                    <button type="submit" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Імпорт
+                    </button>
+                </form>
+
+                <a asp-action="Create" class="btn btn-primary rounded-pill px-4 shadow-sm hover-lift">
+                    <i class="bi bi-plus-circle me-2"></i>Додати новий тип
+                </a> 
+            </div>
         }
     </div>
     

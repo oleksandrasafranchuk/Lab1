@@ -45,96 +45,92 @@ public class BookingsController : Controller
         return View(result);
     }
 
-
-public IActionResult Create(int? workspaceId)
-{
-    var booking = new Booking
+    public IActionResult Create(int? workspaceId)
     {
-        StartTime = DateTime.Now.AddMinutes(5), 
-        EndTime = DateTime.Now.AddHours(1)
-    };
+        var booking = new Booking
+        {
+            StartTime = DateTime.Now.AddMinutes(5), 
+            EndTime = DateTime.Now.AddHours(1)
+        };
 
-    if (workspaceId.HasValue)
-    {
-        booking.WorkspaceId = workspaceId.Value;
-        ViewBag.PricePerHour = _context.Workspaces.Find(workspaceId)?.PricePerHour ?? 0;
-    }
+        if (workspaceId.HasValue)
+        {
+            booking.WorkspaceId = workspaceId.Value;
+            ViewBag.PricePerHour = _context.Workspaces.Find(workspaceId)?.PricePerHour ?? 0;
+        }
 
-    ViewBag.WorkspaceId = new SelectList(_context.Workspaces.Where(w => w.IsActive), "Id", "Number", workspaceId);
-    return View(booking);
-}
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Create(Booking booking, string userComment)
-{
-    ModelState.Remove("User");
-    ModelState.Remove("Workspace");
-    ModelState.Remove("Status");
-    ModelState.Remove("BookingHistories");
-
-    int? userId = HttpContext.Session.GetInt32("UserId");
-    
-    if (userId == null || !await _context.Users.AnyAsync(u => u.Id == userId))
-    {
-        ModelState.AddModelError("", "Помилка авторизації. Спробуйте увійти знову.");
-    }
-
-    bool isOccupied = await _context.Bookings.AnyAsync(b =>
-        b.WorkspaceId == booking.WorkspaceId &&
-        b.Status.StatusName != "Скасовано" &&
-        ((booking.StartTime < b.EndTime) && (booking.EndTime > b.StartTime)));
-
-    if (isOccupied)
-    {
-        ModelState.AddModelError("", "Це місце вже заброньовано на обраний час.");
-    }
-
-    var duration = (decimal)(booking.EndTime - booking.StartTime).TotalHours;
-    if (duration <= 0)
-    {
-        ModelState.AddModelError("", "Час завершення має бути пізнішим за час початку.");
-    }
-
-   if (!ModelState.IsValid)
-    {
-        var ws = await _context.Workspaces.FindAsync(booking.WorkspaceId);
-        ViewBag.PricePerHour = ws?.PricePerHour ?? 0;
-
-    
-        ViewBag.WorkspaceId = new SelectList(_context.Workspaces.Where(w => w.IsActive), "Id", "Number", booking.WorkspaceId);
-        return View(booking); 
-    }
-
-    var pendingStatus = await _context.BookingStatuses.FirstOrDefaultAsync(s => s.StatusName == "Очікує підтвердження");
-    if (pendingStatus == null)
-    {
-        ModelState.AddModelError("", "Системна помилка: статус не знайдено.");
-        ViewBag.WorkspaceId = new SelectList(_context.Workspaces.Where(w => w.IsActive), "Id", "Number", booking.WorkspaceId);
+        ViewBag.WorkspaceId = new SelectList(_context.Workspaces.Where(w => w.IsActive), "Id", "Number", workspaceId);
         return View(booking);
     }
 
-    var workspace = await _context.Workspaces.FindAsync(booking.WorkspaceId);
-    booking.TotalAmount = duration * workspace!.PricePerHour;
-    booking.StatusId = pendingStatus.Id;
-    booking.UserId = userId.Value;
-    booking.CreatedAt = DateTime.Now;
-
-    _context.Add(booking);
-    await _context.SaveChangesAsync();
-
-    _context.BookingHistories.Add(new BookingHistory
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Booking booking, string userComment)
     {
-        BookingId = booking.Id,
-        StatusToId = pendingStatus.Id,
-        ChangedByUserId = userId.Value,
-        ChangedAt = DateTime.Now,
-        ChangeReason = string.IsNullOrEmpty(userComment) ? "Створено новий запит" : $"Коментар: {userComment}"
-    });
+        ModelState.Remove("User");
+        ModelState.Remove("Workspace");
+        ModelState.Remove("Status");
+        ModelState.Remove("BookingHistories");
 
-    await _context.SaveChangesAsync();
-    return RedirectToAction(nameof(Index));
-}
+        int? userId = HttpContext.Session.GetInt32("UserId");
+        
+        if (userId == null || !await _context.Users.AnyAsync(u => u.Id == userId))
+        {
+            ModelState.AddModelError("", "Помилка авторизації. Спробуйте увійти знову.");
+        }
+
+        bool isOccupied = await _context.Bookings.AnyAsync(b =>
+            b.WorkspaceId == booking.WorkspaceId &&
+            b.StatusId != 3 &&
+            ((booking.StartTime < b.EndTime) && (booking.EndTime > b.StartTime)));
+
+        if (isOccupied)
+        {
+            ModelState.AddModelError("", "Це місце вже заброньовано на обраний час.");
+        }
+
+        var duration = (decimal)(booking.EndTime - booking.StartTime).TotalHours;
+        if (duration <= 0)
+        {
+            ModelState.AddModelError("", "Час завершення має бути пізнішим за час початку.");
+        }
+
+        var workspace = await _context.Workspaces.FindAsync(booking.WorkspaceId);
+        if (!ModelState.IsValid)
+        {
+            ViewBag.PricePerHour = workspace?.PricePerHour ?? 0;
+            ViewBag.WorkspaceId = new SelectList(_context.Workspaces.Where(w => w.IsActive), "Id", "Number", booking.WorkspaceId);
+            return View(booking); 
+        }
+
+        if (!await _context.BookingStatuses.AnyAsync(s => s.Id == 1))
+        {
+            ModelState.AddModelError("", "Системна помилка: статус 'Очікує підтвердження' не знайдено.");
+            ViewBag.PricePerHour = workspace?.PricePerHour ?? 0;
+            ViewBag.WorkspaceId = new SelectList(_context.Workspaces.Where(w => w.IsActive), "Id", "Number", booking.WorkspaceId);
+            return View(booking);
+        }
+
+        booking.TotalAmount = duration * workspace!.PricePerHour;
+        booking.StatusId = 1;
+        booking.UserId = userId.Value;
+        booking.CreatedAt = DateTime.Now;
+
+        _context.Add(booking);
+        await _context.SaveChangesAsync();
+
+        _context.BookingHistories.Add(new BookingHistory
+        {
+            BookingId = booking.Id,
+            StatusToId = 1,
+            ChangedByUserId = userId.Value,
+            ChangedAt = DateTime.Now,
+            ChangeReason = string.IsNullOrEmpty(userComment) ? "Створено новий запит" : $"Коментар: {userComment}"
+        });
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -147,7 +143,7 @@ public async Task<IActionResult> Create(Booking booking, string userComment)
 
         bool isBusy = await _context.Bookings.AnyAsync(b => 
             b.WorkspaceId == booking.WorkspaceId && b.Id != booking.Id &&
-            b.Status.StatusName == "Підтверджено" &&
+            b.StatusId == 2 &&
             ((booking.StartTime < b.EndTime) && (booking.EndTime > b.StartTime)));
 
         if (isBusy)
@@ -156,19 +152,18 @@ public async Task<IActionResult> Create(Booking booking, string userComment)
             return RedirectToAction(nameof(Index));
         }
 
-        var confirmedStatus = await _context.BookingStatuses.FirstOrDefaultAsync(s => s.StatusName == "Підтверджено");
-        if (confirmedStatus == null)
+        if (!await _context.BookingStatuses.AnyAsync(s => s.Id == 2))
         {
             TempData["Error"] = "Статус 'Підтверджено' не знайдено. Зверніться до технічної підтримки.";
             return RedirectToAction(nameof(Index));
         }
 
-        booking.StatusId = confirmedStatus.Id;
+        booking.StatusId = 2;
         booking.UpdatedAt = DateTime.Now;
 
         _context.BookingHistories.Add(new BookingHistory {
             BookingId = booking.Id,
-            StatusToId = confirmedStatus.Id,
+            StatusToId = 2,
             ChangedByUserId = HttpContext.Session.GetInt32("UserId"),
             ChangedAt = DateTime.Now,
             ChangeReason = "Адмін підтвердив бронювання"
@@ -188,22 +183,20 @@ public async Task<IActionResult> Create(Booking booking, string userComment)
         string role = HttpContext.Session.GetString("UserRole") ?? "User";
         int? currentUserId = HttpContext.Session.GetInt32("UserId");
 
-
         if (role != "Admin" && booking.UserId != currentUserId) return Forbid();
 
-        var canceledStatus = await _context.BookingStatuses.FirstOrDefaultAsync(s => s.StatusName == "Скасовано");
-        if (canceledStatus == null)
+        if (!await _context.BookingStatuses.AnyAsync(s => s.Id == 3))
         {
             TempData["Error"] = "Статус 'Скасовано' не знайдено. Зверніться до технічної підтримки.";
             return RedirectToAction(nameof(Index));
         }
 
-        booking.StatusId = canceledStatus.Id;
+        booking.StatusId = 3;
         booking.UpdatedAt = DateTime.Now;
 
         _context.BookingHistories.Add(new BookingHistory {
             BookingId = booking.Id,
-            StatusToId = canceledStatus.Id,
+            StatusToId = 3,
             ChangedByUserId = currentUserId,
             ChangedAt = DateTime.Now,
             ChangeReason = !string.IsNullOrWhiteSpace(reason) ? reason : (role == "Admin" ? "Скасовано адміністратором" : "Скасовано користувачем")

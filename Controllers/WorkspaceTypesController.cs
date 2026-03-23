@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab1_Project.Models;
+using ClosedXML.Excel;
+using Xceed.Words.NET;
 
 namespace Lab1_Project.Controllers;
 
@@ -94,5 +96,86 @@ public async Task<IActionResult> Edit(int id, WorkspaceType workspaceType)
         return RedirectToAction(nameof(Index));
     }
     return View(workspaceType);
+}
+
+
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Import(IFormFile file)
+{
+    if (HttpContext.Session.GetString("UserRole") != "Admin") return Forbid();
+
+    if (file == null || file.Length == 0)
+    {
+        TempData["Error"] = "Будь ласка, виберіть файл.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    var newTypes = new List<WorkspaceType>();
+    var extension = Path.GetExtension(file.FileName).ToLower();
+
+    try
+    {
+        using (var stream = new MemoryStream())
+        {
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
+
+            if (extension == ".xlsx") 
+            {
+                using var workbook = new XLWorkbook(stream);
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RangeUsed().RowsUsed().Skip(1); 
+
+                foreach (var row in rows)
+                {
+                    var name = row.Cell(1).GetValue<string>();
+                    var desc = row.Cell(2).GetValue<string>();
+                    if (!string.IsNullOrEmpty(name)) 
+                        newTypes.Add(new WorkspaceType { TypeName = name, Description = desc });
+                }
+            }
+            else if (extension == ".docx") 
+            {
+                using var document = DocX.Load(stream);
+                if (document.Tables.Count > 0)
+                {
+                    var table = document.Tables[0];
+                    foreach (var row in table.Rows.Skip(1)) 
+                    {
+                        var name = row.Cells[0].Paragraphs[0].Text.Trim();
+                        var desc = row.Cells.Count > 1 ? row.Cells[1].Paragraphs[0].Text.Trim() : "";
+                        if (!string.IsNullOrEmpty(name))
+                            newTypes.Add(new WorkspaceType { TypeName = name, Description = desc });
+                    }
+                }
+            }
+            else
+            {
+                TempData["Error"] = "Формат файлу не підтримується. Використовуйте .xlsx або .docx";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        int addedCount = 0;
+        foreach (var type in newTypes)
+        {
+            if (!await _context.WorkspaceTypes.AnyAsync(t => t.TypeName == type.TypeName))
+            {
+                _context.WorkspaceTypes.Add(type);
+                addedCount++;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        TempData["Success"] = $"Успішно додано {addedCount} нових типів.";
+    }
+    catch (Exception ex)
+    {
+        TempData["Error"] = "Помилка при обробці файлу: " + ex.Message;
+    }
+
+    return RedirectToAction(nameof(Index));
 }
 }
